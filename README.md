@@ -1,12 +1,12 @@
 # Room Lab NFT
-#### Lien Déploiement Vercel: [LINK  ](#) <br/>
-#### Déployé sur sépolia : <br/>
+<!-- #### Lien Déploiement Vercel: [LINK  ](#) <br/>
+#### Déployé sur sépolia : <br/> -->
 [RoomLab](#)<br/>
 
 Developpé et déployé par :  
 Maxence VAST : 0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e
 
-## Détails
+<!--## Détails
 
 ### Contract
 
@@ -20,14 +20,10 @@ Voici la liste de la stack utilisée pour la réalisation du projet.
 - Viem
 - NextJs
 - Tailwind CSS
-  <br/><br/>
+  <br/><br/> -->
 
 ### Back/Smart Contract
 Voici la liste de la stack utilisée pour la partie Smart Contract.
 - Hardhat
 - ERC721
 - Librairie OpenZeppelin
-<br/><br/>
-
-### Image Front
-
