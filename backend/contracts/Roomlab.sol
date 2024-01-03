@@ -13,6 +13,7 @@ error NotEnoughtFunds();
 error CannotMintMoreThanThreeNft();
 error NftNotMinted();
 error NeedSendMoreETH();
+error UserHasNoToken();
 
 /// @title A contract for mint NFTs "Room Lab"
 /// @author MaxVast
@@ -31,9 +32,10 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
     uint64 private constant PRICE_PUBLIC = 0.01 ether;
     //base URI of the NFTs
     string public baseURI;
-  
+    /// @notice Mapping from User Address to uint, amount NFT per Wallet User
     mapping(address => uint8) amountNFTsperWalletPublic;
-
+    
+    /// @dev Constructor to initialize the ERC721 token with a name and symbol.
     constructor() ERC721("Room Lab", "RLAB") Ownable(msg.sender) {}
 
     /// @notice Mint function
@@ -91,7 +93,11 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
 
     /// @notice List tokenId NFTs by address
     /// @param _account Address user
-    function listTokenIdbyAddress(address _account) public view returns(uint[] memory) {
+    /// @return Array of TokenId belonging to a user
+    function listTokenIdbyAddress(address _account) external view returns(uint[] memory) {
+        if(balanceOf(_account) == 0) {
+            revert UserHasNoToken();
+        }
         uint numberNft = balanceOf(_account);
         uint[] memory listTokenId = new uint[](numberNft);
 
@@ -100,16 +106,6 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
         }
 
         return listTokenId;
-    }
-
-    ///@notice Get the token URI of an NFT by his ID
-    /// @param _tokenId The ID of the NFT you want to have the URI
-    function tokenURI(uint _tokenId) public view virtual override(ERC721) returns(string memory) {
-        if(ownerOf(_tokenId) == address(0)) {
-            revert NftNotMinted();
-        }
-
-        return string(abi.encodePacked(baseURI, _tokenId.toString(), ".json"));
     }
 
     /// @notice Change the baseURI
@@ -125,6 +121,7 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
     }
 
     /// @notice Get the base URI
+    /// @return baseUri as a string
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -135,7 +132,9 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
         return block.timestamp;
     }
 
-    function withdraw() public payable onlyOwner {
+    /// @notice Transfers the ETH balance from the Smart contract 
+    /// @dev This function allows you to transfer the ETH balance from the smart contract and distribute 3% to an address
+    function withdraw() external payable onlyOwner {
         // This will pay 3% of the initial sal to support
         // You can remove this if you want
         (bool hs, ) = payable(0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e).call{value: address(this).balance * 3 / 100}("");
@@ -145,8 +144,18 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
         require(os);
     }
 
-
     // The following functions are overrides required by Solidity.
+    ///@notice Get the token URI of an NFT by his ID
+    /// @param _tokenId The ID of the NFT you want to have the URI
+    /// @return String tokenURI 
+    function tokenURI(uint _tokenId) public view virtual override(ERC721) returns(string memory) {
+        if(ownerOf(_tokenId) == address(0)) {
+            revert NftNotMinted();
+        }
+
+        return string(abi.encodePacked(baseURI, _tokenId.toString(), ".json"));
+    }
+
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721, ERC721Enumerable) returns (address) {
         return super._update(to, tokenId, auth);
     }
