@@ -125,7 +125,21 @@ describe("Room Lab Contract", function () {
             assert.equal(totalSupplyAfterMint, 1)
             // Check the owner of the minted NFT
             const ownerOfNFT = await roomlabContract.ownerOf(1);
+
             assert.equal(ownerOfNFT, user.address)
+        });
+
+        it("should return the token URI", async function () {
+            const PRICE_PUBLIC = ethers.parseEther("0.1");
+            // Mint NFT for the user
+            await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+            const result = await roomlabContract.connect(user).tokenURI(1)
+            await assert.equal(typeof result === 'string', true)
+        });
+
+        it("should not return the token URI if the NFT is not minted", async function () {
+            await expect(roomlabContract.connect(user).tokenURI(5))
+                .to.be.revertedWithCustomError(roomlabContract, "ERC721NonexistentToken");
         });
 
         it("should refund excess funds if more funds are sent than required", async function () {
@@ -144,6 +158,26 @@ describe("Room Lab Contract", function () {
             const finalBalance = await ethers.provider.getBalance(user.address);
             //Check final balance with initial less price public, less gas used for the transaction
             assert.equal(finalBalance, initialBalance - PRICE_PUBLIC - gasUsed)
+        });
+
+        it("should not mint a NFT if user has already mint 3 NFTS durint the public sale", async function () {
+            const PRICE_PUBLIC = ethers.parseEther("0.1");
+            await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+            await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+            await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+            await expect(roomlabContract.connect(user).mint({ value: PRICE_PUBLIC }))
+                .to.be.revertedWithCustomError(roomlabContract, "CannotMintMoreThanThreeNft");
+        });
+
+        it("should not mint a NFT if the max supply exceeded", async function () {
+            const PRICE_PUBLIC = ethers.parseEther("0.1");
+            const _quantity = 100;
+            await roomlabContract.gift(user.address, _quantity);
+            await roomlabContract.gift(user2.address, _quantity);
+            await roomlabContract.gift(user3.address, _quantity);
+
+            await expect(roomlabContract.connect(user).mint({ value: PRICE_PUBLIC }))
+                .to.be.revertedWithCustomError(roomlabContract, "MaxSupplyExceeded");
         });
     })
 
