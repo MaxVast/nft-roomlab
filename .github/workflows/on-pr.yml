@@ -27,4 +27,4 @@ jobs:
         run: npm run backend:install
 
       - name: Run Hardhat tests
-        run: npm run backend:test
+        run: npm run backend:coverage

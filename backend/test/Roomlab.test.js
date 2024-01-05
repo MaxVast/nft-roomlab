@@ -92,9 +92,11 @@ describe("Room Lab Contract", function () {
         });
 
         it("should revert if the total supply exceeds the maximum supply", async function () {
-            const _quantity = 300;
+            const _quantity = 100;
             // Mint 10 NFTs to reach the maximum supply
             await roomlabContract.gift(user.address, _quantity);
+            await roomlabContract.gift(user2.address, _quantity);
+            await roomlabContract.gift(user3.address, _quantity);
             // Attempt to gift one more NFT, expecting a revert
             await expect(roomlabContract.gift(user2.address, 2))
                 .to.be.revertedWithCustomError(roomlabContract, "MaxSupplyExceeded");
