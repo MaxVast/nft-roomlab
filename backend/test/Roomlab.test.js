@@ -15,6 +15,23 @@ describe("Room Lab Contract", function () {
         return { roomlabContract, owner, user, user2, user3 }
     }
 
+    async function deployNftMintFixture() {
+        [owner, user, user2, user3] = await ethers.getSigners();
+
+        const RoomLabContract = await ethers.getContractFactory("RoomLab");
+        roomlabContract = await RoomLabContract.deploy();
+
+        const PRICE_PUBLIC = ethers.parseEther("0.1");
+        await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+        await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+        await roomlabContract.connect(user).mint({ value: PRICE_PUBLIC });
+        await roomlabContract.connect(user2).mint({ value: PRICE_PUBLIC });
+        await roomlabContract.connect(user2).mint({ value: PRICE_PUBLIC });
+        await roomlabContract.connect(user3).mint({ value: PRICE_PUBLIC });
+
+        return { roomlabContract, owner, user, user2, user3 }
+    }
+
     describe("Check Deploy Smart Contract", () => {
         beforeEach(async function () {
             const roomlabContract = await loadFixture(deployFixture);
@@ -45,7 +62,7 @@ describe("Room Lab Contract", function () {
             const baseURI = "ipfs://bafybeiacjnyyw73lghuleuqcgctpqwer3oety3lu2tfrrryrcihkzkxtia/"
             await roomlabContract.setBaseURI(baseURI)
 
-            assert.equal(await roomlabContract.baseURI(), baseURI)
+            assert.equal(await roomlabContract.getBaseURI(), baseURI)
         });
 
         it("should not set saleStartTime if you are not the Owner", async function () {
@@ -96,6 +113,20 @@ describe("Room Lab Contract", function () {
         });
     })
 
+    describe("Check function override", () => {
+        beforeEach(async function () {
+            const roomlabContract = await loadFixture(deployFixture);
+        });
+
+        it("should support ERC721 and ERC721Enumerable interfaces", async function () {
+            const ERC721InterfaceId = "0x80ac58cd"; // Replace with the actual ERC721 interface ID
+            const ERC721EnumerableInterfaceId = "0x780e9d63"; // Replace with the actual ERC721Enumerable interface ID
+        
+            expect(await roomlabContract.supportsInterface(ERC721InterfaceId)).to.be.true;
+            expect(await roomlabContract.supportsInterface(ERC721EnumerableInterfaceId)).to.be.true;
+          });
+    })
+
     describe("Check Mint NFT", () => {
         beforeEach(async function () {
             const roomlabContract = await loadFixture(deployFixture);
@@ -127,6 +158,14 @@ describe("Room Lab Contract", function () {
             const ownerOfNFT = await roomlabContract.ownerOf(1);
 
             assert.equal(ownerOfNFT, user.address)
+        });
+
+        it("should return event Token Claimed", async function () {
+            const PRICE_PUBLIC = ethers.parseEther("0.1");
+            // Mint NFT for the user
+            await expect(roomlabContract.connect(user).mint({ value: PRICE_PUBLIC }))
+                .to.emit(roomlabContract, 'TokenClaimed')
+                .withArgs(user.address, 1);
         });
 
         it("should return the token URI", async function () {
@@ -179,6 +218,44 @@ describe("Room Lab Contract", function () {
             await expect(roomlabContract.connect(user).mint({ value: PRICE_PUBLIC }))
                 .to.be.revertedWithCustomError(roomlabContract, "MaxSupplyExceeded");
         });
+
+        it("should not return the token URI if the NFT is not minted", async function () {
+            await expect(roomlabContract.connect(user).tokenURI(2))
+                .to.be.revertedWithCustomError(roomlabContract, "ERC721NonexistentToken");
+        });
     })
 
+    describe("Check after Mint NFT", () => {
+        beforeEach(async function () {
+            const roomlabContract = await loadFixture(deployNftMintFixture);
+        });
+
+        it("should not withdraw funds to owner if you are not the Owner", async function () {
+            await expect(roomlabContract.connect(user).withdraw())
+                .to.be.revertedWithCustomError(roomlabContract, "OwnableUnauthorizedAccount")
+                .withArgs(user.address);
+        });
+
+        it("should withdraw funds to owner", async function () {
+            await roomlabContract.withdraw();
+            const contractBalanceAfter = await ethers.provider.getBalance(roomlabContract.target);
+            // Check the balances
+            assert.equal(contractBalanceAfter, 0)
+        });
+
+        it("should revert if user has no tokens", async function () {
+            // Ensure the function reverts if the user has no tokens
+            await expect(roomlabContract.listTokenIdbyAddress(owner.address))
+                .to.be.revertedWithCustomError(roomlabContract, "UserHasNoToken");
+        });
+
+        it("should list TokenIds for a given address", async function () {
+            // Get the list of TokenIds
+            const tokenIdList = await roomlabContract.listTokenIdbyAddress(user.address);
+        
+            // Check the list
+            expect(tokenIdList).to.have.lengthOf(3);
+            assert.equal(Array.isArray(tokenIdList), true);
+        });
+    })
 })

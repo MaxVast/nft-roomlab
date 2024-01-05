@@ -30,7 +30,7 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
     //The price of one NFT
     uint64 private constant PRICE_PUBLIC = 0.1 ether;
     //base URI of the NFTs
-    string public baseURI;
+    string baseURI;
     /// @notice Mapping from User Address to uint, amount NFT per Wallet User
     mapping(address => uint8) amountNFTsperWalletPublic;
 
@@ -38,6 +38,12 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
     /// @dev If a token is gifted, this event should be emitted.
     /// @param user The address of the user claiming the token.
     event TokenGifted(address indexed user);
+
+    /// @notice Emitted when tokens is claimed.
+    /// @dev If a token is claimed, this event should be emitted.
+    /// @param user The address of the user claiming the token.
+    /// @param tokenID The tokenID of the token claiming.
+    event TokenClaimed(address indexed user, uint256 indexed tokenID);
     
     /// @dev Constructor to initialize the ERC721 token with a name and symbol.
     constructor() ERC721("Room Lab", "RLAB") Ownable(msg.sender) {}
@@ -62,9 +68,9 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
 
         amountNFTsperWalletPublic[msg.sender] += 1;
 
-        if (totalSupply() < MAX_SUPPLY) {
-            _safeMint(msg.sender, totalSupply() + 1);
-        }
+        _safeMint(msg.sender, totalSupply() + 1);
+
+         emit TokenClaimed(msg.sender, totalSupply());
 
         refundIfOver(PRICE_PUBLIC * 1);
     }
@@ -78,9 +84,7 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
         }
 
         for(uint i = 1; i <= _quantity; i++) {
-            if (totalSupply() < MAX_SUPPLY) {
-                _safeMint(_account, totalSupply() + 1);
-            }
+             _safeMint(_account, totalSupply() + 1);
         }
 
         emit TokenGifted(_account);
@@ -113,8 +117,13 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
 
     /// @notice Change the baseURI
     /// @param _baseUri The new base URI of the NFTs
-    function setBaseURI(string memory _baseUri) external onlyOwner {
+    function setBaseURI(string calldata _baseUri) external onlyOwner {
         baseURI = _baseUri;
+    }
+
+    /// @notice return the baseURI
+    function getBaseURI() external view returns (string memory) {
+        return _baseURI();
     }
 
     /// @notice Change the saleStartTime
@@ -152,9 +161,7 @@ contract RoomLab is ERC721, ERC721Enumerable, Ownable {
     /// @param _tokenId The ID of the NFT you want to have the URI
     /// @return String tokenURI 
     function tokenURI(uint _tokenId) public view virtual override(ERC721) returns(string memory) {
-        if(ownerOf(_tokenId) == address(0)) {
-            revert NftNotMinted();
-        }
+        require(ownerOf(_tokenId) != address(0));
 
         return string(abi.encodePacked(baseURI, _tokenId.toString(), ".json"));
     }
