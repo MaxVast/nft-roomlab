@@ -11,7 +11,7 @@ env:
   ETHERSCAN_KEY: ${{secrets.ETHERSCAN_KEY}}
 
 jobs:
-  test:
+  hardhat-tests:
     runs-on: ubuntu-latest
 
     steps:
