@@ -16,7 +16,6 @@ npx hardhat run scripts/deploy.js --network localhost
 24 tests.
 24 passing (5s)
 
---------------|----------|----------|----------|----------|----------------|
 File          |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 --------------|----------|----------|----------|----------|----------------|
  contracts/   |    96.67 |    92.86 |    93.33 |     97.5 |                |
