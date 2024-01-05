@@ -15,6 +15,7 @@ npx hardhat run scripts/deploy.js --network localhost
 ### Coverage smart contract :
 24 tests.
 24 passing (5s)
+
 --------------|----------|----------|----------|----------|----------------|
 File          |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 --------------|----------|----------|----------|----------|----------------|
