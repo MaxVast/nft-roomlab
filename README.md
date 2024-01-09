@@ -10,7 +10,7 @@ Maxence VAST : 0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e
 
 ### Contract
 
-This smart contract is a Solidity-based Ethereum platform contract for the creation and management of ERC-721 and ERC-721 Enumerable compliant non-fungible tokens (NFTs). It is also Ownable, meaning it has an owner with special rights.
+This smart contract is a Solidity-based Ethereum platform contract for the creation and management of ERC-721 and ERC-721 Enumerable compliant non-fungible tokens (NFTs).
 
 Here is a summary of its main features:
 
