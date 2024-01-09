@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+.clay-bg {
+  background-color: #e6faf3;
+}
+.clay-primary {
+  color: #053a32;
+}
+.clay-secondary {
+  color: #7b7166;
+}
+.clay-button {
+  background-color: #045d56;
+  color: #ffffff;
+}
+.clay-button:hover {
+  background-color: #033e39;
+}
