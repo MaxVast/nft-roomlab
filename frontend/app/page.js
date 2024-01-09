@@ -3,6 +3,8 @@
 import {useEffect, useState} from 'react'
 import { useAccount } from 'wagmi';
 import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit"
+//NEXTJS
+import Link from "next/link"
 //Constants information SmartContract
 import { contractAddressRoomlab, contractAbiRoomlab } from '@/constants/index'
 // Wagmi
@@ -13,7 +15,7 @@ import { ContractFunctionExecutionError, parseEther } from 'viem'
 export default function Home() {
   /* State */
   const { openConnectModal } = useConnectModal();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const [priceEthUsd, setPriceEthUsd] =  useState(null)
   const [pendingTransaction, setPendingTransaction] =  useState(false)
   const [successTransaction, setSuccessTransaction] =  useState(false)
@@ -97,10 +99,10 @@ export default function Home() {
     <>
       <header className="bg-white px-4 py-6">
         <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-2xl clay-primary font-serif font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}>RoomLab</h1>
+          <h1 className="text-2xl clay-primary font-serif font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/">RoomLab</Link></h1>
           <nav>
             <ul className="flex items-center space-x-4">
-              {isConnected && (<li style={{ fontFamily: "'Montserrat', sans-serif" }}>My NFTs</li>)}
+              {isConnected && (<li style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/my-nfts">My NFTs</Link></li>)}
               <li><ConnectButton /></li>
             </ul>
           </nav>
