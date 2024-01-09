@@ -6,9 +6,9 @@
 Developpé et déployé par :  
 Maxence VAST : 0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e
 
-<!--## Détails
+<!--## Détails-->
 
-### Contract-->
+### Contract
 
 ### Test
 24 tests.
@@ -25,17 +25,20 @@ All files     |    96.67 |    92.86 |    93.33 |     97.5 |                |
 Uncovered line 174 is a mandatory implementation function (_increaseBalance()) for the smart contract, but it is not modified or used.
 
 
-<!--### Front
-Voici la liste de la stack utilisée pour la réalisation du projet.
+### Front
+The list of the stack used for the Front :
 - Rainbow Kit
 - Wagmi
 - Viem
 - NextJs
 - Tailwind CSS
-  <br/><br/> -->
+  <br/><br/>
 
-### Back/Smart Contract
-Voici la liste de la stack utilisée pour la partie Smart Contract.
+### Back-end/Smart Contract
+The list of the stack used for the Smart Contract part :
 - Hardhat
 - ERC721
 - Librairie OpenZeppelin
+
+### Support and Contributions
+If you find this project useful and would like to support its development, consider making a contribution or sending a tip to 0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e
