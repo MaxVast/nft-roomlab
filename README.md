@@ -18,7 +18,7 @@ Here is a summary of its main features:
 - **MAX_PER_ADDRESS_DURING_PUBLIC:** The maximum number of NFTs an address can purchase during the public sale.<br/>
 - **MAX_SUPPLY:** The maximum total number of NFTs that can be created.<br/>
 - **saleStartTime:** The moment when the public sale begins, in Unix timestamp format.<br/>
-- **PRICE_PUBLIC:** The price of one NFT during the public sale, in ether.<br/>
+- **PRICE_PUBLIC:** The price of one NFT during the public sale, in ETH. (0.1 ETH)<br/>
 - **baseURI:** The base URI for NFT metadata.<br/>
 
 #### 2. Events :
