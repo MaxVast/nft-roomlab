@@ -19,7 +19,7 @@ export default function Home() {
   const [successTransaction, setSuccessTransaction] =  useState(false)
   const [errorTransaction, setErrorTransaction] =  useState('')
 
-  //function add Distributor
+  //function Mint NFT
   const mint = async () => {
     setErrorTransaction('')
     setPendingTransaction(false)
@@ -34,7 +34,7 @@ export default function Home() {
         });
         const { hash } = await writeContract(request);
         setPendingTransaction(true)
-        const data = await waitForTransaction({hash: hash})
+        await waitForTransaction({hash: hash})
         setPendingTransaction(false)
         setSuccessTransaction(true)
         return hash;
@@ -44,7 +44,24 @@ export default function Home() {
           if("CallExecutionError" === err.cause.name) {
             setErrorTransaction(err.cause.shortMessage)
           } else {
-            setErrorTransaction(err.cause.reason)
+            if (err.cause.metaMessages[0]) {
+              switch (err.cause.metaMessages[0]) {
+                case "Error: CannotMintMoreThanThreeNft()" :
+                  setErrorTransaction("Vous ne pouvez pas acheter plus de 3 NFTs");
+                  break;
+                case "Error: MaxSupplyExceeded()" :
+                  setErrorTransaction("Il n'y a plus de NFT disponible à la vente");
+                  break;
+                case "Error: NotEnoughtFunds()" :
+                  setErrorTransaction("Vous n'avez pas envoyé assez d'ETH");
+                  break;
+                case "Error: CannotBuyYet()" :
+                  setErrorTransaction("La vente de NFT n'a pas encore démarré");
+                  break;
+              }
+            } else {
+              setErrorTransaction("An error occured");
+            }
           }
         } else {
           setErrorTransaction("An error occured")
@@ -54,9 +71,21 @@ export default function Home() {
       openConnectModal()
     }
   }
+
+  // Function return ETH price on $
+  const getPriceEth = async () => {
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      const data = await response.json();
+      const priceFormat = (parseFloat(data.ethereum.usd) / 10).toFixed(2);
+      setPriceEthUsd(priceFormat)
+    } catch (err) {
+      console.log('API coingecko error')
+    }
+  }
   
   useEffect(() => {
-
+    getPriceEth()
   }, [])
 
   useEffect(() => {
@@ -79,13 +108,13 @@ export default function Home() {
       </header>
       <main className="container mx-auto py-6 px-4">
         <section id="mint-nft" className="text-center">
-          <h2 className="text-4xl clay-primary mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>Mint a NFT</h2>
-          <p className="text-2xl clay-primary pt-6 px-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>RLAB is a collection of 300 NFTs<br /><br />MINT YOURS NOW !</p>
-          <p className="text-2sm clay-primary pb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>Each NFT costs 0.1 ETH 
-          {priceEthUsd != null && (<><span>≈ {priceEthUsd} $ </span>(excluding gas fees)</>)}</p>
-          <button className="clay-button py-2 px-4 rounded" onClick={() => mint()}>Mint now</button>
-          {pendingTransaction && (<p  className="text-2sm pt-6 text-blue-600" style={{ fontFamily: "'Montserrat', sans-serif" }}>Your transaction is being processed by the blockchain...</p>)}
-          {successTransaction && (<p  className="text-2sm pt-6 text-green-600" style={{ fontFamily: "'Montserrat', sans-serif" }}>Mint Successful!</p>)}
+          <h2 className="text-4xl clay-primary mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>Acquérir un NFT</h2>
+          <p className="text-2xl clay-primary pt-6 px-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>RLAB est une collection de 300 NFTs<br /><br />ACHETER LE VOTRE MAINTENANT !</p>
+          <p className="text-2sm clay-primary pb-6" style={{ fontFamily: "'Montserrat', sans-serif" }}>Chaque NFT coûte 0.1 ETH
+          {priceEthUsd != null && (<><span> ≈ {priceEthUsd} $ </span>(sans frais de transaction)</>)}</p>
+          <button className="clay-button py-2 px-4 rounded" onClick={() => mint()}>Acquérir un NFT</button>
+          {pendingTransaction && (<p  className="text-2sm pt-6 text-blue-600" style={{ fontFamily: "'Montserrat', sans-serif" }}>Votre transaction est en cours de validation par la Blockchain ...</p>)}
+          {successTransaction && (<p  className="text-2sm pt-6 text-green-600" style={{ fontFamily: "'Montserrat', sans-serif" }}>Achat réussi!</p>)}
           {errorTransaction != '' && (<p  className="text-2sm pt-6 text-red-600" style={{ fontFamily: "'Montserrat', sans-serif" }}>{errorTransaction}</p>)}
         </section>
         <section id="nft-collection" className="flex justify-center py-6 px-4">
@@ -153,7 +182,7 @@ export default function Home() {
             <div className="accordion-item mt-6">
               <h3 className="accordion-title font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}>Quand aura lieu le mint ?</h3>
               <div className="accordion-content">
-                <p>Le mint se déroulera le 31 octobre 2023. L'ouverture publique des achats aura lieu à 18h.</p>
+                <p>Le mint se déroulera le 8 Janvier 2024. L'ouverture publique des achats aura lieu à 18h.</p>
               </div>
             </div>
             <div className="accordion-item mt-6">
@@ -163,7 +192,7 @@ export default function Home() {
                   Une ambition long terme signifie des utilités long terme et les détenteurs de NFT RLAB peuvent s'attendre à des expériences exclusives,<br/>
                   auparavant inaccessibles au grand public : rencontre avec des designers mobilier, visite de la manufacture, inauguration des futurs meuble, invitation VIP pour Roland Garros, réduction lors des achats en ligne et pour les plus chanceux un mobilier offert.<br/><br/>
                   Le NFT offrira aussi la possibilité de co-créer des objets de merchandising par la première collection de NFT et réservés exclusivement à la communauté web3.<br/><br/>
-                  Enfin chaque détenteur du NFT RLAB sera privilégié sur l'ensemble de la roadmap 2023-2024, puisqu'il sera whitelisté pour les prochains drops !
+                  Enfin chaque détenteur du NFT RLAB sera privilégié sur l'ensemble de la roadmap 2024-2025, puisqu'il sera whitelisté pour les prochains drops !
                 </p>
               </div>
             </div>
@@ -181,7 +210,7 @@ export default function Home() {
         </section>
       </main>
       <footer className="bg-white py-4 px-4 text-center">
-        <p className="clay-secondary pb-4">© SYNEIDO LAB 2024</p>
+        <p className="clay-secondary pb-4">© MaxVast 2024</p>
         <button type="button" className="px-2">
           <a href="#" target="_blank">
             <svg className="" fill="#04111D" height="45" viewBox="0 0 293.775 293.671" width="45" xmlns="http://www.w3.org/2000/svg">
