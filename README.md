@@ -40,7 +40,6 @@ Checks are performed to ensure that the total number of NFTs after the operation
 - **setBaseURI:** Allows the owner to change the base URI of metadata.
 - **setSaleStartTime:** Allows the owner to change the sale start time.
 - **withdraw:** Allows the owner to withdraw funds from the contract, redistributing a portion to a specific address (3%) and the rest to the owner.
-<br/><br/>
 
 
 This is essentially an NFT contract with sale, gifting, and fund management mechanisms. The created NFTs follow the ERC-721 standard and can be claimed, gifted, and listed by owners.
