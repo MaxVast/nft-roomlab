@@ -17,6 +17,7 @@ export default function pageNft() {
     const { address, isConnected } = useAccount()
     const [loadingNFT, setLoadingNFT] = useState(false)
     const [errorTransaction, setErrorTransaction] =  useState(false)
+    const [errorLoading, setErrorLoading] =  useState('')
     const [listTokenUri, setListTokenUri] = useState([])
 
      const getTokenUri = async (_tokenId) => {
@@ -77,6 +78,7 @@ export default function pageNft() {
                 if (err instanceof ContractFunctionExecutionError) {
                     if("CallExecutionError" === err.cause.name) {
                         setErrorTransaction(true)
+                        setErrorLoading('Une erreur est survenue')
                     } else {
                         if (err.cause.metaMessages[0]) {
                             switch (err.cause.metaMessages[0]) {
@@ -140,7 +142,15 @@ export default function pageNft() {
                                     <p className="text-2xl text-bold text-center clay-primary">Chargement de vos NFT RoomLab...</p>
                                 )}
                                 {errorTransaction && (
-                                    <p className="text-2xl text-bold text-center clay-primary">Vous n'avez pas de NFT RoomLab</p>
+                                    errorLoading ? (
+                                        <>
+                                            <p className="text-2xl text-bold text-center clay-primary">{errorLoading}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-2xl text-bold text-center clay-primary">Vous n'avez pas de NFT RoomLab</p>
+                                        </>
+                                    )
                                 )}
                             </div>
                         </section>
