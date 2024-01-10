@@ -34,14 +34,27 @@ export default function pageNft() {
             let dataNFTs = []
             for(let i = 0; i < arrayTokenUri.length; i++) {
                 let response = await fetch(arrayTokenUri[i])
-                const result = await response.json()
-                let linkImage = result.image.slice(7)
-                let newURI = 'https://ipfs.io/ipfs/'+linkImage
-                let data = {
-                    name: result.name,
-                    image: newURI
+                if (!response.ok) {
+                    //setErrorTransaction(true)
+                    if (response.status === 504) {
+                        console.error('504 Gateway Timeout Error');
+                        
+                        //setErrorLoading('Erreur de chargement')
+                    } else {
+                        console.error('Error fetching data:', response.statusText);
+                        //setErrorLoading('Erreur de chargement')
+                    }
+                    continue; // Skip to the next iteration
+                } else {
+                    const result = await response.json()
+                    let linkImage = result.image.slice(7)
+                    let newURI = 'https://ipfs.io/ipfs/'+linkImage
+                    let data = {
+                        name: result.name,
+                        image: newURI
+                    }
+                    dataNFTs.push(data)
                 }
-                dataNFTs.push(data)
             }
             setListTokenUri(dataNFTs)
         } catch (e) {
