@@ -2,15 +2,15 @@
 //REACT
 import {useEffect, useState} from 'react'
 import { useAccount} from 'wagmi';
-import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit"
-//NEXTJS
-import Link from "next/link"
+import { useConnectModal } from "@rainbow-me/rainbowkit"
 //Constants information SmartContract
 import { contractAddressRoomlab, contractAbiRoomlab } from '@/constants/index'
 // Wagmi
 import { readContract } from '@wagmi/core'
 // Viem
 import { ContractFunctionExecutionError } from 'viem'
+//COMPONENTS
+import Header from "@/components/Header/Header";
 
 export default function pageNft() {
     /* State */
@@ -34,27 +34,14 @@ export default function pageNft() {
             let dataNFTs = []
             for(let i = 0; i < arrayTokenUri.length; i++) {
                 let response = await fetch(arrayTokenUri[i])
-                if (!response.ok) {
-                    //setErrorTransaction(true)
-                    if (response.status === 504) {
-                        console.error('504 Gateway Timeout Error');
-                        
-                        //setErrorLoading('Erreur de chargement')
-                    } else {
-                        console.error('Error fetching data:', response.statusText);
-                        //setErrorLoading('Erreur de chargement')
-                    }
-                    continue; // Skip to the next iteration
-                } else {
-                    const result = await response.json()
-                    let linkImage = result.image.slice(7)
-                    let newURI = 'https://ipfs.io/ipfs/'+linkImage
-                    let data = {
-                        name: result.name,
-                        image: newURI
-                    }
-                    dataNFTs.push(data)
+                const result = await response.json()
+                let linkImage = result.image.slice(7)
+                let newURI = 'https://ipfs.io/ipfs/'+linkImage
+                let data = {
+                    name: result.name,
+                    image: newURI
                 }
+                dataNFTs.push(data)
             }
             setListTokenUri(dataNFTs)
         } catch (e) {
@@ -120,55 +107,44 @@ export default function pageNft() {
 
     return (
         <>
-            <header className="bg-white px-4 py-6">
-                <div className="container mx-auto flex items-center justify-between">
-                    <h1 className="text-2xl clay-primary font-serif font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/">RoomLab</Link></h1>
-                    <nav>
-                        <ul className="flex items-center space-x-4">
-                            {isConnected && (<li style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/my-nfts">My NFTs</Link></li>)}
-                            <li><ConnectButton /></li>
-                        </ul>
-                    </nav>
-                </div>
-            </header>
-
+            <Header/>
             <main className="clay-bg container mx-auto py-6 px-4 text-center">
                 <div className="container mx-auto items-center justify-between text-center">
                     <h2 className="text-2xl clay-primary font-serif font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}>Mes NFTs</h2>
                 </div>
-
                 {isConnected ? (
-                    <>
-                        <section id="nft-collection" className="justify-center py-6 px-4">
-                            <article className="nft mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                {listTokenUri.map((item, index) => (
-                                    <div className="flex max-w-xl flex-col items-between justify-between py-6 px-4">
-                                        <img className="group relative" loading="lazy" src={item.image} alt={`NFT ${index}`} />
-                                        <p className="text-center clay-secondary group relative">{item.name}</p>
-                                    </div>
-                                ))}
-                            </article>
-                        </section>
-                        <section className="mt-2">
-                            <div className="nft mr-4">
-                                {loadingNFT && (
-                                    <p className="text-2xl text-bold text-center clay-primary">Chargement de vos NFT RoomLab...</p>
-                                )}
-                                {errorTransaction && (
-                                    errorLoading ? (
-                                        <>
-                                            <p className="text-2xl text-bold text-center clay-primary">{errorLoading}</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p className="text-2xl text-bold text-center clay-primary">Vous n'avez pas de NFT RoomLab</p>
-                                        </>
-                                    )
-                                )}
-                            </div>
-                        </section>
-                    </>
-
+                    listTokenUri && (
+                        <>
+                            <section id="nft-collection" className="justify-center py-6 px-4">
+                                <article className="nft mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                    {listTokenUri.map((item, key) => (
+                                        <div className="flex max-w-xl flex-col items-between justify-between py-6 px-4" id={`nft-${key}`}>
+                                            <img className="group relative" loading="lazy" src={item.image} alt={`NFT : ${item.name}`} />
+                                            <p className="text-center clay-secondary group relative">{item.name}</p>
+                                        </div>
+                                    ))}
+                                </article>
+                            </section>
+                            <section className="mt-2">
+                                <div className="nft mr-4">
+                                    {loadingNFT && (
+                                        <p className="text-2xl text-bold text-center clay-primary">Chargement de vos NFT RoomLab...</p>
+                                    )}
+                                    {errorTransaction && (
+                                        errorLoading ? (
+                                            <>
+                                                <p className="text-2xl text-bold text-center clay-primary">{errorLoading}</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="text-2xl text-bold text-center clay-primary">Vous n'avez pas de NFT RoomLab</p>
+                                            </>
+                                        )
+                                    )}
+                                </div>
+                            </section>
+                        </>
+                    )
                 ) : (
                     <>
                         <section className="mt-2">
@@ -178,7 +154,6 @@ export default function pageNft() {
                         </section>
                     </>
                 )}
-
             </main>
 
             <footer className="bg-white py-4 px-4 text-center">
