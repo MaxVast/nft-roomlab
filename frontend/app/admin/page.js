@@ -28,8 +28,29 @@ const page = () => {
     const [newBaseURI, setNewBaseURI] =  useState('')
     const [baseURI, setBaseURI] =  useState('')
     const [quantity, setQuantity] =  useState(0)
-    const [selectedDate, setSelectedDate] = useState(new Date());
-    
+    //FORM DATE
+    const today = new Date();
+    const [day, setDay] = useState('');
+    const [month, setMonth] = useState('');
+    const [year, setYear] = useState('');
+    const [hour, setHour] = useState('');
+    const [minute, setMinute] = useState('');
+    const [timestamp, setTimestamp] = useState(null);
+
+    const generateOptions = (start, end) => {
+        const options = [];
+        for (let i = start; i <= end; i++) {
+            options.push(i.toString().padStart(2, '0'));
+        }
+        return options;
+    }
+    const daysOptions = generateOptions(1, 31);
+    const monthsOptions = generateOptions(1, 12);
+    const yearsOptions = generateOptions(2024, 2050);
+    const hoursOptions = generateOptions(0, 23);
+    const minutesOptions = generateOptions(0, 59);
+
+    //FUNCTIONS
     const giftTokens = async (_account, _quantity) => {
         if (isConnected) {
             try {
@@ -68,20 +89,51 @@ const page = () => {
         }
     }
 
+    const withdraw = async () => {
+        if (isConnected && isOwner) {
+            try {
+                const { request } = await prepareWriteContract({
+                    address: contractAddressRoomlab,
+                    abi: contractAbiRoomlab,
+                    functionName: "withdraw"
+                });
+                const { hash } = await writeContract(request);
+                setPendingTransaction(true)
+                await waitForTransaction({hash: hash})
+                setPendingTransaction(false)
+                setSuccessTransaction(true)
+                setBalanceSmartContract('0')
+                return hash;
+            } catch (err) {
+                console.log(err)
+                if( err instanceof ContractFunctionExecutionError) {
+                    if("CallExecutionError" === err.cause.name) {
+                        setErrorTransaction(err.cause.shortMessage)
+                    } else {
+                        setErrorTransaction("An error occured");
+                    }
+                } else {
+                    setErrorTransaction("An error occured")
+                }
+            }
+        }
+    }
+
     const setUri = async (_baseUri) => {
         if (isConnected && isOwner) {
             try {
-              const { request } = await prepareWriteContract({
+                const { request } = await prepareWriteContract({
                   address: contractAddressRoomlab,
                   abi: contractAbiRoomlab,
                   functionName: "setBaseURI",
                   args: [ _baseUri ]
-              });
-              const { hash } = await writeContract(request);
-              setPendingTransaction(true)
-              await waitForTransaction({hash: hash})
-              setPendingTransaction(false)
-              setSuccessTransaction(true)
+                });
+                const { hash } = await writeContract(request);
+                setPendingTransaction(true)
+                await waitForTransaction({hash: hash})
+                setPendingTransaction(false)
+                setSuccessTransaction(true)
+                setBaseURI(_baseUri)
               return hash;
             } catch (err) {
               console.log(err)
@@ -94,6 +146,36 @@ const page = () => {
               } else {
                 setErrorTransaction("An error occured")
               }
+            }
+        }
+    }
+
+    const setSaleStartTime = async (_timestamp) => {
+        if (isConnected && isOwner) {
+            try {
+                const { request } = await prepareWriteContract({
+                    address: contractAddressRoomlab,
+                    abi: contractAbiRoomlab,
+                    functionName: "setSaleStartTime",
+                    args: [ BigInt(_timestamp) ]
+                });
+                const { hash } = await writeContract(request);
+                setPendingTransaction(true)
+                await waitForTransaction({hash: hash})
+                setPendingTransaction(false)
+                setSuccessTransaction(true)
+                return hash;
+            } catch (err) {
+                console.log(err)
+                if( err instanceof ContractFunctionExecutionError) {
+                    if("CallExecutionError" === err.cause.name) {
+                        setErrorTransaction(err.cause.shortMessage)
+                    } else {
+                        setErrorTransaction("An error occured");
+                    }
+                } else {
+                    setErrorTransaction("An error occured")
+                }
             }
         }
     }
@@ -136,20 +218,20 @@ const page = () => {
         setUri(newBaseURI)
     }
 
-    const handleDateChange = (e) => {
-        const { name, value } = e.target;
-        console.log(selectedDate)
-        const newDate = { ...selectedDate, [name]: parseInt(value, 10) };
-        console.log(newDate)
-    
-        //setSelectedDate(newDate);
-      };
-
     const handleSubmitDate = (e) => {
         e.preventDefault();
-        const timestamp = selectedDate.getTime();
-        console.log('Selected Timestamp:', timestamp);
-        // Ajoutez ici le code pour traiter le timestamp
+        const formattedDate = `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}T${("0" + hour).slice(-2)}:${("0" + minute).slice(-2)}:00`;
+        const selectedDate = new Date(formattedDate);
+        console.log(formattedDate)
+        const selectedTimestamp = Math.floor(selectedDate.getTime() / 1000);
+        console.log(selectedTimestamp)
+        setTimestamp(selectedTimestamp);
+        setSaleStartTime(selectedTimestamp)
+    }
+
+    const handleSubmitWithdraw = (e) => {
+        e.preventDefault();
+        withdraw();
     }
 
     useEffect(() => {
@@ -157,6 +239,15 @@ const page = () => {
         getBalanceSmartContract()
         getBaseUri()
     }, [isConnected, address])
+
+    useEffect(() => {
+        const updatedToday = new Date();
+        setDay(updatedToday.getDate().toString().padStart(2, '0'));
+        setMonth((updatedToday.getMonth() + 1).toString().padStart(2, '0'));
+        setYear(updatedToday.getFullYear().toString());
+        setHour(updatedToday.getHours().toString().padStart(2, '0'));
+        setMinute(updatedToday.getMinutes().toString().padStart(2, '0'));
+    }, [timestamp]);
 
     useEffect(() => {
         isUserTheOwner()
@@ -230,81 +321,46 @@ const page = () => {
                             <div className="mb-4 flex flex-wrap">
                                 <label className="w-full md:w-1/5" htmlFor="day">
                                     Jour:
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                        name="day"
-                                        value={selectedDate.getDate()}
-                                        onChange={handleDateChange}
-                                        required
-                                    >
-                                        {Array.from({ length: 31 }, (_, index) => index + 1).map((day) => (
-                                        <option key={day} value={day}>
-                                            {day}
-                                        </option>
+                                    <select id="day" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                            name="day" value={day} onChange={(e) => setDay(e.target.value)} required>
+                                        {daysOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </label>
                                 <label className="w-full md:w-1/5" htmlFor="month">
                                     Mois:
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                        name="month"
-                                        value={selectedDate.getMonth() + 1}
-                                        onChange={handleDateChange}
-                                        required
-                                    >
-                                        {Array.from({ length: 12 }, (_, index) => index + 1).map((month) => (
-                                        <option key={month} value={month}>
-                                            {month}
-                                        </option>
+                                    <select id="month" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                            name="month" value={month} onChange={(e) => setMonth(e.target.value)} required>
+                                        {monthsOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </label>
                                 <label className="w-full md:w-1/5" htmlFor="year">
                                     Année:
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                        name="year"
-                                        value={selectedDate.getFullYear()}
-                                        onChange={handleDateChange}
-                                        required
-                                    >
-                                        {Array.from({ length: 100 }, (_, index) => selectedDate.getFullYear() + index).map((year) => (
-                                        <option key={year} value={year}>
-                                            {year}
-                                        </option>
+                                    <select id="year" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                            name="year" value={year} onChange={(e) => setYear(e.target.value)} required>
+                                        {yearsOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </label>
                                 <label className="w-full md:w-1/5" htmlFor="hours">
                                     Heure:
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                        name="hours"
-                                        value={selectedDate.getHours()}
-                                        onChange={handleDateChange}
-                                        required
-                                    >
-                                        {Array.from({ length: 24 }, (_, index) => index).map((hour) => (
-                                        <option key={hour} value={hour}>
-                                            {hour}
-                                        </option>
+                                    <select id="hour" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                            name="hour" value={hour} onChange={(e) => setHour(e.target.value)} required>
+                                        {hoursOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </label>
                                 <label className="w-full md:w-1/5" htmlFor="minutes">
                                     Minutes:
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-                                        name="minutes"
-                                        value={selectedDate.getMinutes()}
-                                        onChange={handleDateChange}
-                                        required
-                                    >
-                                        {Array.from({ length: 60 }, (_, index) => index).map((minute) => (
-                                        <option key={minute} value={minute}>
-                                            {minute}
-                                        </option>
+                                    <select id="minute" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                                            name="minute" value={minute} onChange={(e) => setMinute(e.target.value)} required>
+                                        {minutesOptions.map((option) => (
+                                            <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
                                 </label>
@@ -314,7 +370,7 @@ const page = () => {
 
 
 
-                        <form className="max-w-[600px] w-full mx-4 mt-8 p-4 bg-white shadow-md rounded-md">
+                        <form onSubmit={handleSubmitWithdraw} className="max-w-[600px] w-full mx-4 mt-8 p-4 bg-white shadow-md rounded-md">
                             <div className="mb-4">
                                 <label htmlFor="withdraw" className="block text-gray-600 font-semibold mb-2">Transfer :</label>
                             </div>
