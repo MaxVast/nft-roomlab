@@ -2,15 +2,15 @@
 //REACT
 import {useEffect, useState} from 'react'
 import { useAccount } from 'wagmi';
-import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit"
-//NEXTJS
-import Link from "next/link"
+import { useConnectModal } from "@rainbow-me/rainbowkit"
 //Constants information SmartContract
 import { contractAddressRoomlab, contractAbiRoomlab } from '@/constants/index'
 // Wagmi
 import { prepareWriteContract, writeContract,waitForTransaction } from '@wagmi/core'
 // Viem
 import { ContractFunctionExecutionError, parseEther } from 'viem'
+//COMPONENTS
+import Header from "@/components/Header/Header";
 
 export default function Home() {
   /* State */
@@ -97,17 +97,7 @@ export default function Home() {
   }, [isConnected])
   return (
     <>
-      <header className="bg-white px-4 py-6">
-        <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-2xl clay-primary font-serif font-bold" style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/">RoomLab</Link></h1>
-          <nav>
-            <ul className="flex items-center space-x-4">
-              {isConnected && (<li style={{ fontFamily: "'Montserrat', sans-serif" }}><Link href="/my-nfts">My NFTs</Link></li>)}
-              <li><ConnectButton /></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Header />
       <main className="container mx-auto py-6 px-4">
         <section id="mint-nft" className="text-center">
           <h2 className="text-4xl clay-primary mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>Acquérir un NFT</h2>
