@@ -750,4 +750,4 @@ export const contractAbiRoomlab = [
     }
   ]
 
-export const contractAddressRoomlab = process.env.NEXT_PUBLIC_ENV === 'dev' ? '0x5FbDB2315678afecb367f032d93F642f64180aa3' : '';
+export const contractAddressRoomlab = process.env.NEXT_PUBLIC_ENV === 'dev' ? '0x5FbDB2315678afecb367f032d93F642f64180aa3' : '0x0Db6627efa9AA5FEDf3f604003CaDA2524744907';

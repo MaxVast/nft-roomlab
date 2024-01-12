@@ -1,7 +1,6 @@
 # Room Lab NFT
-<!-- #### Lien Déploiement Vercel: [LINK  ](#) <br/>
-#### Déployé sur sépolia : <br/>
-[RoomLab](#)<br/> -->
+<!-- #### Lien Déploiement Vercel: [LINK  ](#) <br/>-->
+#### Déployé sur sépolia : [Smart contract Roomlab](https://sepolia.etherscan.io/address/0x0Db6627efa9AA5FEDf3f604003CaDA2524744907#code) <br/>
 
 Developpé et déployé par :  
 Maxence VAST : 0xe79B2cc4c07dB560f8e1eE63ed407DD2DCFdE80e
